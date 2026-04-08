@@ -4,7 +4,7 @@ import { AlertTriangle, Clock3, ShieldAlert, Siren, TriangleAlert } from "lucide
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress, ProgressLabel, ProgressValue } from "@/components/ui/progress";
+import { Progress, ProgressLabel } from "@/components/ui/progress";
 import type { PreparationStatus, SurgeryCase } from "@/types/dashboard";
 
 const prepStatusStyleMap: Record<PreparationStatus, string> = {
@@ -49,8 +49,10 @@ export function ChecklistProgressBar({ completed, total }: { completed: number; 
   return (
     <div className="space-y-1">
       <Progress value={value}>
-        <ProgressLabel className="text-xs text-slate-500">체크리스트 진행률</ProgressLabel>
-        <ProgressValue>{value}%</ProgressValue>
+        <ProgressLabel className="text-xs text-slate-500">
+          체크리스트 진행률{" "}
+          <span className="tabular-nums text-muted-foreground">{value}%</span>
+        </ProgressLabel>
       </Progress>
       <p className="text-xs text-slate-500">
         {completed}/{total} 항목 완료

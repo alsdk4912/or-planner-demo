@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Clock3 } from "lucide-react";
 
@@ -30,6 +31,7 @@ import type { PreparationStatus } from "@/types/dashboard";
 const prepFilterOptions: Array<PreparationStatus | "전체"> = ["전체", "준비완료", "검토필요", "누락", "중요"];
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [roomFilter, setRoomFilter] = useState("전체");
   const [deptFilter, setDeptFilter] = useState("전체");
   const [surgeonFilter, setSurgeonFilter] = useState("전체");
@@ -110,7 +112,7 @@ export default function DashboardPage() {
               title={`${item.surgeryName} (${item.operatingRoom})`}
               description={`${item.scheduledTime} · ${item.assignedNurse} · ${item.checklist.blockedByStage}`}
               actionLabel="케이스 열기"
-              onClick={() => (window.location.href = `/cases/${item.id}`)}
+              onClick={() => router.push(`/cases/${item.id}`)}
               chip={<StatusChip label={item.preparationStatus} tone={item.preparationStatus === "누락" ? "danger" : item.preparationStatus === "검토필요" ? "warn" : "ok"} />}
             />
           ))}
@@ -198,7 +200,7 @@ function FilterSelect({
   return (
     <div className="space-y-1">
       <p className="text-sm font-medium text-slate-700">{label}</p>
-      <Select value={value} onValueChange={onChange}>
+      <Select value={value} onValueChange={(v) => v != null && onChange(v)}>
         <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-[#f3f6ff] text-slate-700">
           <SelectValue />
         </SelectTrigger>

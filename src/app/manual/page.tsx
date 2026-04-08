@@ -26,7 +26,7 @@ export default function ManualPage() {
       </Link>
 
       <AppCard title="수술 선택">
-        <Select value={caseId} onValueChange={setCaseId}>
+        <Select value={caseId} onValueChange={(value) => value && setCaseId(value)}>
           <SelectTrigger className="h-11 w-full rounded-xl border-[var(--app-border)] bg-white">
             <SelectValue />
           </SelectTrigger>
