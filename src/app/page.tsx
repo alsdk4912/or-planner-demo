@@ -1,65 +1,215 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import { Clock3 } from "lucide-react";
+
+import {
+  HeaderHero,
+  MobileFrame,
+  RoundedActionCard,
+  SectionCard,
+  StatusChip,
+} from "@/components/mobile/design-system";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  allDepartments,
+  allOperatingRooms,
+  allSurgeons,
+  getSurgeryCaseDetailById,
+  surgeryCases,
+} from "@/data/mock-surgeries";
+import type { PreparationStatus } from "@/types/dashboard";
+
+const prepFilterOptions: Array<PreparationStatus | "전체"> = ["전체", "준비완료", "검토필요", "누락", "중요"];
+
+export default function DashboardPage() {
+  const [roomFilter, setRoomFilter] = useState("전체");
+  const [deptFilter, setDeptFilter] = useState("전체");
+  const [surgeonFilter, setSurgeonFilter] = useState("전체");
+  const [prepFilter, setPrepFilter] = useState<PreparationStatus | "전체">("전체");
+
+  const filteredCases = useMemo(
+    () =>
+      surgeryCases.filter((item) => {
+        return (
+          (roomFilter === "전체" || item.operatingRoom === roomFilter) &&
+          (deptFilter === "전체" || item.department === deptFilter) &&
+          (surgeonFilter === "전체" || item.surgeon === surgeonFilter) &&
+          (prepFilter === "전체" || item.preparationStatus === prepFilter)
+        );
+      }),
+    [roomFilter, deptFilter, surgeonFilter, prepFilter],
+  );
+
+  const summary = useMemo(() => {
+    const total = filteredCases.length;
+    const prepCompleteCount = filteredCases.filter((item) => item.preparationStatus === "준비완료").length;
+    const delayedChecklistCount = filteredCases.filter(
+      (item) => item.flags.delayedPreparation || item.checklist.blockedByStage !== "없음",
+    ).length;
+    const attentionRequiredCount = filteredCases.filter(
+      (item) => item.flags.missingSupplies || item.flags.emergency || item.preparationStatus !== "준비완료",
+    ).length;
+    return { total, prepCompleteCount, delayedChecklistCount, attentionRequiredCount };
+  }, [filteredCases]);
+
+  const avgChecklistProgress = useMemo(() => {
+    if (!filteredCases.length) return 0;
+    return Math.round(
+      filteredCases.reduce((acc, item) => acc + (item.checklist.completedCount / item.checklist.totalCount) * 100, 0) /
+        filteredCases.length,
+    );
+  }, [filteredCases]);
+
+  const priorityQueue = useMemo(
+    () =>
+      filteredCases
+        .filter((item) => item.flags.missingSupplies || item.flags.emergency || item.checklist.blockedByStage !== "없음")
+        .slice(0, 6),
+    [filteredCases],
+  );
+
+  const quickLookups = useMemo(
+    () =>
+      priorityQueue.map((item) => {
+        const detail = getSurgeryCaseDetailById(item.id);
+        return {
+          id: item.id,
+          surgeryName: item.surgeryName,
+          room: item.operatingRoom,
+          materials: detail?.requiredMaterials.slice(0, 2) ?? [],
+          equipment: detail?.requiredEquipment.slice(0, 2) ?? [],
+          location: detail?.equipmentLocations[0]?.location ?? "위치 정보 없음",
+        };
+      }),
+    [priorityQueue],
+  );
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <MobileFrame>
+      <HeaderHero title="오늘 수술실 운영" subtitle="중요 케이스를 먼저 확인하고 바로 처리하세요." right={<StatusChip label={`${summary.total}건`} tone="info" />}>
+        <div className="grid grid-cols-3 gap-2">
+          <MiniHeroStat label="준비완료" value={summary.prepCompleteCount} />
+          <MiniHeroStat label="지연" value={summary.delayedChecklistCount} />
+          <MiniHeroStat label="주의" value={summary.attentionRequiredCount} />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+      </HeaderHero>
+
+      <SectionCard title="지금 해야 할 일" subtitle="우선순위 케이스">
+        <div className="space-y-2">
+          {priorityQueue.map((item) => (
+            <RoundedActionCard
+              key={item.id}
+              title={`${item.surgeryName} (${item.operatingRoom})`}
+              description={`${item.scheduledTime} · ${item.assignedNurse} · ${item.checklist.blockedByStage}`}
+              actionLabel="케이스 열기"
+              onClick={() => (window.location.href = `/cases/${item.id}`)}
+              chip={<StatusChip label={item.preparationStatus} tone={item.preparationStatus === "누락" ? "danger" : item.preparationStatus === "검토필요" ? "warn" : "ok"} />}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          ))}
         </div>
-      </main>
+      </SectionCard>
+
+      <SectionCard title="빠른 조회" subtitle="재료 · 장비 · 위치">
+        <div className="space-y-2">
+          {quickLookups.map((item) => (
+            <div key={item.id} className="rounded-2xl bg-[#f5f8ff] p-3">
+              <p className="text-sm font-semibold">{item.surgeryName}</p>
+              <p className="mt-1 text-sm text-slate-700">재료: {item.materials.join(", ")}</p>
+              <p className="text-sm text-slate-700">장비: {item.equipment.join(", ")}</p>
+              <p className="text-sm text-blue-700">위치: {item.location}</p>
+            </div>
+          ))}
+        </div>
+      </SectionCard>
+
+      <SectionCard title="필터">
+        <div className="space-y-3">
+          <FilterSelect label="수술실" value={roomFilter} onChange={setRoomFilter} options={["전체", ...allOperatingRooms]} />
+          <FilterSelect label="진료과" value={deptFilter} onChange={setDeptFilter} options={["전체", ...allDepartments]} />
+          <FilterSelect label="교수/집도의" value={surgeonFilter} onChange={setSurgeonFilter} options={["전체", ...allSurgeons]} />
+          <FilterSelect label="준비 상태" value={prepFilter} onChange={(value) => setPrepFilter(value as PreparationStatus | "전체")} options={prepFilterOptions} />
+        </div>
+      </SectionCard>
+
+      <SectionCard title="오늘 수술 일정" subtitle={`체크리스트 평균 ${avgChecklistProgress}%`}>
+        <div className="space-y-2">
+          {filteredCases.map((surgery) => (
+            <Link key={surgery.id} href={`/cases/${surgery.id}`} className="block rounded-2xl bg-[#f5f8ff] p-3">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold">{surgery.surgeryName}</p>
+                <StatusChip label={surgery.urgency} tone={surgery.urgency === "응급" ? "danger" : surgery.urgency === "긴급" ? "warn" : "info"} />
+              </div>
+              <p className="mt-2 flex items-center gap-1 text-xs text-slate-700">
+                <Clock3 className="size-3.5" /> {surgery.scheduledTime} · {surgery.operatingRoom}
+              </p>
+              <p className="mt-1 text-sm text-slate-700">담당 {surgery.assignedNurse} / 집도의 {surgery.surgeon}</p>
+              <p className="mt-2 text-xs text-blue-700">다음 액션: 상세 열어 체크리스트 확인</p>
+            </Link>
+          ))}
+        </div>
+      </SectionCard>
+
+      <section className="grid grid-cols-4 gap-2 pb-2">
+        <NavPill href="/" label="대시보드" />
+        <NavPill href="/manual" label="매뉴얼" />
+        <NavPill href="/preferences" label="교수차이" />
+        <NavPill href="/admin" label="관리" />
+      </section>
+    </MobileFrame>
+  );
+}
+
+function MiniHeroStat({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-xl bg-white/15 px-2 py-2">
+      <p className="text-[11px] text-blue-100">{label}</p>
+      <p className="text-base font-semibold">{value}</p>
+    </div>
+  );
+}
+
+function NavPill({ href, label }: { href: string; label: string }) {
+  return (
+    <Link href={href} className="rounded-xl bg-white px-2 py-2 text-center text-xs font-medium text-slate-700">
+      {label}
+    </Link>
+  );
+}
+
+function FilterSelect({
+  label,
+  value,
+  onChange,
+  options,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: string[];
+}) {
+  return (
+    <div className="space-y-1">
+      <p className="text-sm font-medium text-slate-700">{label}</p>
+      <Select value={value} onValueChange={onChange}>
+        <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-[#f3f6ff] text-slate-700">
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {option}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
