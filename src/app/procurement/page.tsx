@@ -18,6 +18,11 @@ export default function ProcurementPage() {
   const recs = useMemo(() => getAllRecommendations().filter((r) => r.order_required), []);
   const targetItemId = selectedItemId || recs[0]?.item_id || itemMasters[0].item_id;
   const prices = useMemo(() => getItemPriceComparisons(targetItemId), [targetItemId]);
+  const yearlySaving = useMemo(() => {
+    const top = prices[0];
+    if (!top) return 0;
+    return Math.round((top.groupSaving || Math.round(top.price * 0.05)) * 1200);
+  }, [prices]);
 
   return (
     <MobileFrame>
@@ -71,6 +76,10 @@ export default function ProcurementPage() {
 
       {tab === "가격비교" && (
         <SectionCard title="공급사 가격비교">
+          <div className="mb-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2">
+            <p className="text-xs font-semibold text-emerald-900">최저가/최적공급사 선택 시 연간 예상 절감액</p>
+            <p className="mt-1 text-sm font-bold text-emerald-700">{Math.round(yearlySaving / 10000).toLocaleString()}만 원</p>
+          </div>
           <div className="space-y-2">
             {prices.map((row) => (
               <div key={row.vendor_item_price_id} className="rounded-2xl border border-[var(--app-border)] bg-white p-3">
@@ -84,7 +93,7 @@ export default function ProcurementPage() {
                 <p className="mt-1 text-xs text-slate-600">
                   계약 {row.contract_type} {row.group_purchase_supported ? "· 공동구매 가능" : ""}
                 </p>
-                {row.groupSaving > 0 && <p className="mt-1 text-xs text-emerald-700">공동구매 예상 절감 {row.groupSaving.toLocaleString()}원/EA</p>}
+                {row.groupSaving > 0 && <p className="mt-1 text-xs text-emerald-700">공동구매 예상 절감 {row.groupSaving.toLocaleString()}원/EA · 연간 {Math.round((row.groupSaving * 1200) / 10000).toLocaleString()}만 원</p>}
               </div>
             ))}
           </div>

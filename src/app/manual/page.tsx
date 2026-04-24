@@ -140,6 +140,9 @@ export default function ManualPage() {
       {detailTab === "카메라세트점검" && (
         <AppCard title="카메라 세트 점검 (AI/AR 데모)">
           <div className="space-y-2">
+            <p className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-1 text-[11px] font-semibold text-emerald-800">
+              이 기능을 통한 신규 간호사 교육 시간 60% 단축 효과 데모
+            </p>
             <div className="grid grid-cols-2 gap-2">
               <button type="button" onClick={() => setVisionMode("누락탐지")} className="rounded-xl bg-rose-600 px-2 py-2 text-xs font-semibold text-white">
                 누락 탐지

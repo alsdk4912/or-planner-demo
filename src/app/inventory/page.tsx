@@ -27,6 +27,12 @@ export default function InventoryPage() {
         }),
     [query, recommendations],
   );
+  const storageCostSaving = useMemo(() => {
+    const overstock = recommendations
+      .map((rec) => Math.max(0, rec.current_stock - rec.recommended_stock))
+      .reduce((acc, cur) => acc + cur, 0);
+    return overstock * 12000;
+  }, [recommendations]);
 
   const handleScanSearch = () => {
     const found = itemMasters.find((item) => item.item_id === scanCode.trim() || item.item_name.includes(scanCode.trim()));
@@ -55,6 +61,10 @@ export default function InventoryPage() {
       </SectionCard>
 
       <SectionCard title="AI 재고추천" subtitle="권장 근거를 함께 제공합니다">
+        <div className="mb-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2">
+          <p className="text-xs font-semibold text-emerald-900">적정 재고 유지 시 창고 기회비용 절감액(월)</p>
+          <p className="mt-1 text-sm font-bold text-emerald-700">{Math.round(storageCostSaving / 10000).toLocaleString()}만 원</p>
+        </div>
         <div className="space-y-2">
           {recommendations.slice(0, 3).map((rec) => {
             const item = itemMasters.find((i) => i.item_id === rec.item_id)!;
