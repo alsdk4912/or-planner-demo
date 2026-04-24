@@ -89,10 +89,10 @@ export default function DashboardPage() {
 
         <section className="rounded-2xl bg-white p-2 shadow-[0_2px_10px_rgba(15,23,42,0.06)]">
           <div className="grid grid-cols-4 gap-1">
-            <DetectionRow label="오늘 준비 누락 위험" value={missingRiskCount} tone={missingRiskCount > 0 ? "danger" : "ok"} />
-            <DetectionRow label="재고 부족 예상" value={inventoryStats.shortage} tone={inventoryStats.shortage > 0 ? "warn" : "ok"} />
+            <DetectionRow label="준비누락 위험" value={missingRiskCount} tone={missingRiskCount > 0 ? "danger" : "ok"} />
+            <DetectionRow label="재고부족 예상" value={inventoryStats.shortage} tone={inventoryStats.shortage > 0 ? "warn" : "ok"} />
             <DetectionRow label="발주 필요" value={inventoryStats.orderNeeded} tone={inventoryStats.orderNeeded > 0 ? "warn" : "ok"} />
-            <DetectionRow label="체크리스트 차단 상태" value={blockedCount} tone={blockedCount > 0 ? "danger" : "ok"} />
+            <DetectionRow label="체크 차단상태" value={blockedCount} tone={blockedCount > 0 ? "danger" : "ok"} />
           </div>
         </section>
 
@@ -202,11 +202,11 @@ function DetectionRow({
   tone: "ok" | "warn" | "danger";
 }) {
   return (
-    <div className={`flex items-center justify-between rounded-lg border px-2 py-1.5 text-xs ${
+    <div className={`flex min-h-11 items-center justify-between rounded-lg border px-2 py-2 text-xs ${
       tone === "danger" ? "border-rose-200 bg-rose-50 text-rose-700" : tone === "warn" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"
     }`}>
-      <p className="truncate pr-1 text-[10px] font-semibold">{label}</p>
-      <span className="shrink-0 rounded-full bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">{value}건</span>
+      <p className="pr-1 text-[10px] font-semibold leading-tight">{label}</p>
+      <span className="shrink-0 rounded-full bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">{value}</span>
     </div>
   );
 }
