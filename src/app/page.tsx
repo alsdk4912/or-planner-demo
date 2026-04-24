@@ -115,7 +115,7 @@ export default function DashboardPage() {
             {panelTab === "긴급" && (
               <div className="space-y-1.5">
                 {urgentCases.slice(0, 3).map((item) => (
-                  <Link key={item.id} href={`/cases/${item.id}`} className="block rounded-xl border border-rose-100 bg-rose-50 px-2.5 py-2">
+                  <Link key={item.id} href={`/cases/${item.id}/`} className="block rounded-xl border border-rose-100 bg-rose-50 px-2.5 py-2">
                     <p className="truncate text-xs font-semibold text-rose-700">{item.surgeryName}</p>
                     <p className="mt-0.5 truncate text-[11px] text-rose-700">
                       {item.scheduledTime} · {item.operatingRoom} · {item.checklist.blockedByStage}
@@ -131,7 +131,7 @@ export default function DashboardPage() {
             {panelTab === "수술" && (
               <div className="space-y-1.5">
                 {upcomingSurgeries.map((surgery) => (
-                  <Link key={surgery.id} href={`/cases/${surgery.id}`} className="block rounded-xl bg-[#f4f7ff] px-2.5 py-2">
+                  <Link key={surgery.id} href={`/cases/${surgery.id}/`} className="block rounded-xl bg-[#f4f7ff] px-2.5 py-2">
                     <div className="flex items-center justify-between gap-2">
                       <p className="truncate text-xs font-semibold text-slate-900">{surgery.surgeryName}</p>
                       <StatusChip label={surgery.urgency} tone={surgery.urgency === "응급" ? "danger" : surgery.urgency === "긴급" ? "warn" : "info"} />

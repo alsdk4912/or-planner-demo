@@ -61,7 +61,7 @@ export default function SchedulePage() {
                 );
               })()}
               <div className="flex items-center justify-between gap-2">
-                <Link href={`/cases/${item.id}`} className="text-sm font-semibold text-slate-900 hover:underline">
+                <Link href={`/cases/${item.id}/`} className="text-sm font-semibold text-slate-900 hover:underline">
                   {item.surgeryName}
                 </Link>
                 <StatusChip
@@ -73,10 +73,10 @@ export default function SchedulePage() {
                 <Clock3 className="size-3.5" /> {item.scheduledTime} · {item.operatingRoom} · {item.assignedNurse}
               </p>
               <div className="mt-2 grid grid-cols-3 gap-2">
-                <Link href={`/cases/${item.id}`} className="rounded-xl bg-white px-2 py-2 text-center text-xs font-semibold text-slate-700">
+                <Link href={`/cases/${item.id}/`} className="rounded-xl bg-white px-2 py-2 text-center text-xs font-semibold text-slate-700">
                   상세
                 </Link>
-                <Link href={`/cases/${item.id}/checklist`} className="rounded-xl bg-blue-600 px-2 py-2 text-center text-xs font-semibold text-white">
+                <Link href={`/cases/${item.id}/checklist/`} className="rounded-xl bg-blue-600 px-2 py-2 text-center text-xs font-semibold text-white">
                   체크리스트
                 </Link>
                 <Link href={`/notes?caseId=${encodeURIComponent(item.id)}`} className="rounded-xl bg-slate-200 px-2 py-2 text-center text-xs font-semibold text-slate-700">
