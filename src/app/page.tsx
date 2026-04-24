@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { AlertTriangle, Bell, Clock3 } from "lucide-react";
+import { AlertTriangle, BarChart3, Bell, Clock3 } from "lucide-react";
 
 import {
   AppTabBar,
@@ -88,7 +88,7 @@ export default function DashboardPage() {
         </section>
 
         <section className="rounded-2xl bg-white p-2 shadow-[0_2px_10px_rgba(15,23,42,0.06)]">
-          <div className="space-y-1">
+          <div className="grid grid-cols-4 gap-1">
             <DetectionRow label="오늘 준비 누락 위험" value={missingRiskCount} tone={missingRiskCount > 0 ? "danger" : "ok"} />
             <DetectionRow label="재고 부족 예상" value={inventoryStats.shortage} tone={inventoryStats.shortage > 0 ? "warn" : "ok"} />
             <DetectionRow label="발주 필요" value={inventoryStats.orderNeeded} tone={inventoryStats.orderNeeded > 0 ? "warn" : "ok"} />
@@ -96,10 +96,10 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-blue-100 bg-blue-50 px-3 py-2">
-          <p className="text-[11px] text-blue-800">핵심 지표 추이는 하단 탭 대신 데이터 화면에서 확인하세요.</p>
-          <Link href="/analytics" className="mt-1 inline-block text-xs font-semibold text-blue-700 underline">
-            데이터 개선 화면 열기
+        <section className="rounded-2xl border border-blue-100 bg-blue-50 p-2">
+          <Link href="/analytics" className="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-white px-2 py-2 text-xs font-semibold text-blue-700">
+            <BarChart3 className="size-3.5" />
+            데이터
           </Link>
         </section>
 
@@ -205,8 +205,8 @@ function DetectionRow({
     <div className={`flex items-center justify-between rounded-lg border px-2 py-1.5 text-xs ${
       tone === "danger" ? "border-rose-200 bg-rose-50 text-rose-700" : tone === "warn" ? "border-amber-200 bg-amber-50 text-amber-700" : "border-emerald-200 bg-emerald-50 text-emerald-700"
     }`}>
-      <p className="font-semibold">{label}</p>
-      <span className="rounded-full bg-white/80 px-2 py-0.5 font-bold">{value}건</span>
+      <p className="truncate pr-1 text-[10px] font-semibold">{label}</p>
+      <span className="shrink-0 rounded-full bg-white/80 px-1.5 py-0.5 text-[10px] font-bold">{value}건</span>
     </div>
   );
 }
