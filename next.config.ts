@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-const repoName = "or-planner-demo";
+const repoName = "or-v";
 
 const nextConfig: NextConfig = {
   output: "export",
