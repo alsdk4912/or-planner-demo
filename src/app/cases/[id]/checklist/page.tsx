@@ -49,6 +49,10 @@ export default function ChecklistExecutionPage() {
   const [expandedStage, setExpandedStage] = useState<ChecklistStageName>("Sign In");
   const [blockMessage, setBlockMessage] = useState<string | null>(null);
   const [mockVoiceText, setMockVoiceText] = useState("");
+  const [countExpected, setCountExpected] = useState("20");
+  const [countActual, setCountActual] = useState("20");
+  const [showCountMismatchAlert, setShowCountMismatchAlert] = useState(false);
+  const [showTimeOutControlModal, setShowTimeOutControlModal] = useState(false);
 
   useEffect(() => {
     if (caseId) initializeCase(caseId);
@@ -99,6 +103,11 @@ export default function ChecklistExecutionPage() {
   };
 
   const handleCompleteStage = () => {
+    if (selectedStage === "Sign Out" && Number(countExpected) !== Number(countActual)) {
+      setShowCountMismatchAlert(true);
+      setBlockMessage("기구 카운트 불일치로 Sign-out 완료가 차단되었습니다.");
+      return;
+    }
     const result = completeStage({ caseId, stage: selectedStage, actor: demoActor });
     if (!result.ok) setBlockMessage(result.reason ?? "단계 완료 처리에 실패했습니다.");
     else setBlockMessage(null);
@@ -121,6 +130,13 @@ export default function ChecklistExecutionPage() {
   const completionTone = selectedStageState.status === "완료" ? "ok" : selectedStageState.status === "진행중" ? "info" : "neutral";
 
   const voiceLogs = caseState.voiceLogs.slice(-4);
+  const timeOutState = caseState.stages["Time Out"];
+
+  useEffect(() => {
+    if (selectedStage === "Time Out" && timeOutState.status !== "완료") {
+      setShowTimeOutControlModal(true);
+    }
+  }, [selectedStage, timeOutState.status]);
 
   return (
     <MobileFrame>
@@ -277,6 +293,31 @@ export default function ChecklistExecutionPage() {
 
                 {isOpen && (
                   <div className="mt-3 space-y-2">
+                    {stage === "Sign Out" && (
+                      <div className="rounded-xl border border-rose-200 bg-rose-50 p-3">
+                        <p className="text-xs font-semibold text-rose-700">안전 제어: 기구/거즈 카운트 대조</p>
+                        <div className="mt-2 grid grid-cols-2 gap-2">
+                          <label className="rounded-lg bg-white px-2 py-2 text-xs">
+                            입력 기준 수량
+                            <input
+                              type="number"
+                              value={countExpected}
+                              onChange={(event) => setCountExpected(event.target.value)}
+                              className="mt-1 h-9 w-full rounded-md border border-slate-200 px-2 text-sm"
+                            />
+                          </label>
+                          <label className="rounded-lg bg-white px-2 py-2 text-xs">
+                            실제 카운트 수량
+                            <input
+                              type="number"
+                              value={countActual}
+                              onChange={(event) => setCountActual(event.target.value)}
+                              className="mt-1 h-9 w-full rounded-md border border-slate-200 px-2 text-sm"
+                            />
+                          </label>
+                        </div>
+                      </div>
+                    )}
                     {stageState.items.map((item) => {
                       const isCurrent = currentTargetItem?.id === item.id && !item.completed;
                       return (
@@ -333,6 +374,52 @@ export default function ChecklistExecutionPage() {
 
       <BottomCTABar label={`${selectedStage} 단계 완료 처리`} onClick={handleCompleteStage} />
       <div className="pb-20" />
+
+      {showCountMismatchAlert && (
+        <section className="fixed inset-0 z-50 flex items-center justify-center bg-rose-900/70 px-4">
+          <div className="w-full max-w-[420px] rounded-2xl border-2 border-rose-300 bg-rose-50 p-5 text-center shadow-[0_16px_40px_rgba(127,29,29,0.45)]">
+            <p className="text-lg font-extrabold text-rose-700">거즈 누락 가능성! 다시 확인하세요</p>
+            <p className="mt-2 text-sm font-semibold text-rose-800">
+              입력값 {countExpected} / 실제 {countActual} 불일치
+            </p>
+            <p className="mt-1 text-xs text-rose-700">Sign-out은 카운트 일치 전까지 잠금됩니다.</p>
+            <button
+              type="button"
+              onClick={() => setShowCountMismatchAlert(false)}
+              className="mt-4 h-11 w-full rounded-xl bg-rose-600 text-sm font-semibold text-white"
+            >
+              재확인 후 계속
+            </button>
+          </div>
+        </section>
+      )}
+
+      {showTimeOutControlModal && (
+        <section className="fixed inset-0 z-40 flex items-center justify-center bg-blue-950/45 px-4">
+          <div className="h-[80vh] w-full max-w-[430px] rounded-3xl border-2 border-blue-300 bg-white p-5">
+            <p className="text-xs font-bold text-blue-700">CONTROL MODE</p>
+            <h3 className="mt-1 text-2xl font-extrabold text-slate-900">기록은 결과지만, 제어는 생명이다</h3>
+            <p className="mt-2 text-sm font-semibold text-blue-700">Time-out 안전 확인을 완료해야 다음 단계로 진행됩니다.</p>
+            <div className="mt-4 space-y-3">
+              {timeOutState.items
+                .filter((item) => item.required)
+                .map((item) => (
+                  <div key={item.id} className={`rounded-xl border px-3 py-3 ${item.completed ? "border-emerald-200 bg-emerald-50" : "border-blue-300 bg-blue-50"}`}>
+                    <p className="text-sm font-semibold text-slate-900">{item.label}</p>
+                    <p className="mt-1 text-xs text-slate-600">{item.completed ? "확인 완료" : "미확인"}</p>
+                  </div>
+                ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setShowTimeOutControlModal(false)}
+              className="mt-5 h-12 w-full rounded-xl bg-blue-600 text-sm font-semibold text-white"
+            >
+              Time-out 제어 화면 닫기
+            </button>
+          </div>
+        </section>
+      )}
     </MobileFrame>
   );
 }

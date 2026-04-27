@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AppTabBar, HeaderHero, MobileFrame, SectionCard } from "@/components/mobile/design-system";
 
 const links = [
+  { href: "/mypage/", title: "간호사 마이페이지", desc: "나의 수술 숙련도 차트 확인" },
   { href: "/checklists", title: "케이스 체크리스트", desc: "Sign-in/Time-out/Sign-out 수행" },
   { href: "/notes", title: "기록 / 메모", desc: "케이스 특이사항과 관리자 메모" },
   { href: "/sterilization", title: "멸균 / 유효기간", desc: "임박/만료/재멸균/폐기 후보 관리" },

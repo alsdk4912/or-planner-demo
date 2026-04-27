@@ -37,7 +37,17 @@ export default function AdminPage() {
   const [checklistTemplates, setChecklistTemplates] = useState(checklistTemplateMocks);
   const [manualVersions, setManualVersions] = useState(manualVersionMocks);
   const [completionLogs] = useState(completionLogMocks);
+  const [selectedSurgeonForTimeline, setSelectedSurgeonForTimeline] = useState("김도윤 교수");
   const [lastSavedAt, setLastSavedAt] = useState<string>("미저장");
+
+  const timelineInsight = useMemo(() => {
+    const base = {
+      "김도윤 교수": { avgReadyMin: 15, top10ReadyMin: 12, delayRate: 8 },
+      "이승민 교수": { avgReadyMin: 18, top10ReadyMin: 14, delayRate: 12 },
+      "정태훈 교수": { avgReadyMin: 21, top10ReadyMin: 16, delayRate: 16 },
+    } as const;
+    return base[selectedSurgeonForTimeline as keyof typeof base] ?? base["김도윤 교수"];
+  }, [selectedSurgeonForTimeline]);
 
   const counts = useMemo(
     () => ({
@@ -299,6 +309,30 @@ export default function AdminPage() {
                     </p>
                   </div>
                 ))}
+      </AppCard>
+
+      <AppCard title="수술별 표준 타임라인 분석">
+        <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
+          <p className="text-xs font-semibold text-blue-700">분석 대상 교수</p>
+          <select
+            value={selectedSurgeonForTimeline}
+            onChange={(event) => setSelectedSurgeonForTimeline(event.target.value)}
+            className="mt-2 h-10 w-full rounded-lg border border-blue-200 bg-white px-2 text-sm"
+          >
+            {["김도윤 교수", "이승민 교수", "정태훈 교수"].map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
+          <p className="mt-3 text-sm font-semibold text-slate-900">
+            {selectedSurgeonForTimeline}의 평균 수술 준비 시간은 {timelineInsight.avgReadyMin}분이며, 상위 10% 숙련 간호사는{" "}
+            {timelineInsight.top10ReadyMin}분 만에 완료함
+          </p>
+          <p className="mt-1 text-xs text-slate-600">
+            지연 케이스 비율 {timelineInsight.delayRate}% · 표준 템플릿 기반 간극 자동 학습 중
+          </p>
+        </div>
       </AppCard>
     </MobileAppShell>
   );
