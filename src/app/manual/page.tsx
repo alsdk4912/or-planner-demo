@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { ArrowLeft, Info, MapPin, PlayCircle, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { ArrowLeft, Camera, Info, MapPin, PlayCircle, X } from "lucide-react";
 
 import { AppCard, BlueHero, MobileAppShell } from "@/components/mobile/app-shell";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -10,7 +10,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { getSurgeryCaseDetailById, surgeryCases } from "@/data/mock-surgeries";
 
 export default function ManualPage() {
-  const [caseId, setCaseId] = useState(surgeryCases[0]?.id ?? "");
+  const surgeryNameOptions = useMemo(() => Array.from(new Set(surgeryCases.map((item) => item.surgeryName))), []);
+  const [selectedSurgeryName, setSelectedSurgeryName] = useState(surgeryNameOptions[0] ?? "");
+  const surgeonOptions = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          surgeryCases.filter((item) => item.surgeryName === selectedSurgeryName).map((item) => item.surgeon),
+        ),
+      ),
+    [selectedSurgeryName],
+  );
+  const [selectedSurgeon, setSelectedSurgeon] = useState("");
   const [topTab, setTopTab] = useState<"매뉴얼" | "교수선호">("매뉴얼");
   const [detailTab, setDetailTab] = useState<"매뉴얼" | "카메라세트점검">("매뉴얼");
   const [activeEquipment, setActiveEquipment] = useState<string | null>(null);
@@ -19,8 +30,13 @@ export default function ManualPage() {
   const [showProcedurePopup, setShowProcedurePopup] = useState(false);
   const [newNurseMode, setNewNurseMode] = useState(false);
   const [handlingTarget, setHandlingTarget] = useState<string | null>(null);
-  const detail = getSurgeryCaseDetailById(caseId);
-  const surgery = surgeryCases.find((item) => item.id === caseId);
+  const surgery =
+    surgeryCases.find(
+      (item) =>
+        item.surgeryName === selectedSurgeryName &&
+        (selectedSurgeon ? item.surgeon === selectedSurgeon : true),
+    ) ?? surgeryCases[0];
+  const detail = getSurgeryCaseDetailById(surgery.id);
 
   if (!detail || !surgery) {
     return null;
@@ -46,18 +62,49 @@ export default function ManualPage() {
       </section>
 
       <AppCard title="수술 선택">
-        <Select value={caseId} onValueChange={(value) => value && setCaseId(value)}>
+        <Select
+          value={selectedSurgeryName}
+          onValueChange={(value) => {
+            if (!value) return;
+            setSelectedSurgeryName(value);
+            setSelectedSurgeon("");
+          }}
+        >
           <SelectTrigger className="h-11 w-full rounded-xl border-[var(--app-border)] bg-white">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {surgeryCases.map((item) => (
-              <SelectItem key={item.id} value={item.id}>
-                {item.surgeryName} ({item.id})
+            {surgeryNameOptions.map((name) => (
+              <SelectItem key={name} value={name}>
+                {name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        <div className="mt-2">
+          <Select
+            value={selectedSurgeon || "전체"}
+            onValueChange={(value) => {
+              if (!value || value === "전체") {
+                setSelectedSurgeon("");
+                return;
+              }
+              setSelectedSurgeon(value);
+            }}
+          >
+            <SelectTrigger className="h-11 w-full rounded-xl border-[var(--app-border)] bg-white">
+              <SelectValue placeholder="교수 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="전체">교수 전체</SelectItem>
+              {surgeonOptions.map((name) => (
+                <SelectItem key={name} value={name}>
+                  {name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </AppCard>
 
       {topTab === "매뉴얼" && (
@@ -307,6 +354,12 @@ export default function ManualPage() {
           </div>
         </section>
       )}
+      <Link
+        href="/sterilization"
+        className="fixed bottom-24 right-4 z-30 inline-flex size-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_8px_18px_rgba(37,99,235,0.35)]"
+      >
+        <Camera className="size-5" />
+      </Link>
     </MobileAppShell>
   );
 }

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { AlertTriangle, Camera, Sparkles, X } from "lucide-react";
+import { AlertTriangle, Camera, Search, Sparkles, X } from "lucide-react";
 
 import { AppTabBar, HeaderHero, MobileFrame, SectionCard, StatusChip } from "@/components/mobile/design-system";
 import { MiddlewareSyncSimulator } from "@/components/inventory/middleware-sync-simulator";
@@ -20,13 +20,24 @@ export default function InventoryPage() {
   const rows = useMemo(
     () =>
       itemMasters
-        .filter((item) => `${item.item_name} ${item.category}`.includes(query))
+        .filter((item) => `${item.item_name} ${item.category}`.includes(query.trim()))
         .map((item) => {
           const rec = recommendations.find((r) => r.item_id === item.item_id)!;
           const lotCount = inventoryLots.filter((lot) => lot.item_id === item.item_id).length;
           return { item, rec, risk: getItemRisk(item.item_id), lotCount };
         }),
     [query, recommendations],
+  );
+  const aiQuickCards = useMemo(
+    () =>
+      recommendations
+        .filter((rec) => rec.order_required)
+        .slice(0, 5)
+        .map((rec) => {
+          const item = itemMasters.find((i) => i.item_id === rec.item_id)!;
+          return { item, rec };
+        }),
+    [recommendations],
   );
   const storageCostSaving = useMemo(() => {
     const overstock = recommendations
@@ -51,7 +62,7 @@ export default function InventoryPage() {
     <MobileFrame>
       <HeaderHero
         title="재고"
-        subtitle="수술 예측 기반 권장재고와 실제 로트를 함께 관리"
+        subtitle="검색 중심 재고 운영 · AI 보충 권장"
         right={
           <div className="flex items-center gap-1">
             <button type="button" onClick={() => setShowScanner(true)} className="inline-flex items-center gap-1 rounded-lg bg-white/20 px-2 py-1 text-xs font-semibold text-white">
@@ -62,37 +73,48 @@ export default function InventoryPage() {
           </div>
         }
       />
-      <SectionCard title="검색/필터">
-        <Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="품목명, 카테고리" className="h-11 rounded-xl border-0 bg-[#f3f6ff]" />
+      <SectionCard title="재고 검색">
+        <div className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
+          <p className="mb-2 text-center text-xs font-semibold text-blue-800">필요한 품목만 즉시 검색</p>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-blue-500" />
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="품목명, 카테고리, 코드"
+              className="h-12 rounded-xl border-0 bg-white pl-9"
+            />
+          </div>
+        </div>
         {scanResult && <p className="mt-2 text-xs text-blue-700">{scanResult}</p>}
       </SectionCard>
       <MiddlewareSyncSimulator />
 
-      <SectionCard title="AI 재고추천" subtitle="권장 근거를 함께 제공합니다">
+      <SectionCard title="AI 재고 보충 추천" subtitle="현재 수술 패턴 기반 핵심 5개">
         <div className="mb-2 rounded-xl border border-emerald-200 bg-emerald-50 p-2">
           <p className="text-xs font-semibold text-emerald-900">적정 재고 유지 시 창고 기회비용 절감액(월)</p>
           <p className="mt-1 text-sm font-bold text-emerald-700">{Math.round(storageCostSaving / 10000).toLocaleString()}만 원</p>
         </div>
         <div className="space-y-2">
-          {recommendations.slice(0, 3).map((rec) => {
-            const item = itemMasters.find((i) => i.item_id === rec.item_id)!;
+          {aiQuickCards.map(({ item, rec }) => {
             return (
               <div key={rec.item_id} className="rounded-2xl border border-blue-100 bg-blue-50 p-3">
                 <p className="flex items-center gap-1 text-sm font-semibold text-blue-800">
                   <Sparkles className="size-4" />
-                  {item.item_name}
+                  {item.item_name} 보충 권장
                 </p>
                 <p className="mt-1 text-xs text-blue-700">권장재고 {rec.recommended_stock}{item.unit} / 현재 {rec.current_stock}{item.unit}</p>
-                <p className="mt-1 text-xs text-slate-700">{rec.reason_lines[0]}</p>
+                <p className="mt-1 text-xs text-slate-700">예측 수술 대비 {item.item_name} 선제 확보 필요</p>
               </div>
             );
           })}
         </div>
       </SectionCard>
 
-      <SectionCard title="품목 재고현황">
-        <div className="space-y-2 pb-24">
-          {rows.map(({ item, rec, risk, lotCount }) => (
+      {query.trim() ? (
+        <SectionCard title="검색 결과">
+          <div className="space-y-2 pb-24">
+            {rows.map(({ item, rec, risk, lotCount }) => (
             <div key={item.item_id} className="rounded-2xl bg-white p-3 shadow-[0_1px_6px_rgba(15,23,42,0.06)]">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-semibold text-slate-900">{item.item_name}</p>
@@ -114,10 +136,19 @@ export default function InventoryPage() {
                 </Link>
               </div>
             </div>
-          ))}
-        </div>
-      </SectionCard>
+            ))}
+            {rows.length === 0 && <p className="rounded-xl bg-slate-50 px-3 py-4 text-center text-xs text-slate-500">검색 결과가 없습니다.</p>}
+          </div>
+        </SectionCard>
+      ) : null}
       <AppTabBar currentPath="/inventory" />
+      <button
+        type="button"
+        onClick={() => setShowScanner(true)}
+        className="fixed bottom-24 right-4 z-30 inline-flex size-12 items-center justify-center rounded-full bg-blue-600 text-white shadow-[0_8px_18px_rgba(37,99,235,0.35)]"
+      >
+        <Camera className="size-5" />
+      </button>
 
       {showScanner && (
         <section className="fixed inset-0 z-40 flex items-end bg-slate-900/45">

@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { AlertTriangle, BarChart3, Camera, ClipboardCheck, Info, ShoppingCart } from "lucide-react";
 
 import { AppTabBar } from "@/components/mobile/design-system";
+import { surgeryCases } from "@/data/mock-surgeries";
 
 type RoleMode = "NURSE_MODE" | "ADMIN_MODE";
 type SurgeryStage = "Pre" | "Intra" | "Post";
@@ -52,6 +53,10 @@ export default function DashboardPage() {
   );
 
   const timeoutRate = useMemo(() => Math.round((timeOutDoneRooms / 98) * 100), [timeOutDoneRooms]);
+  const currentSurgery = useMemo(
+    () => surgeryCases.find((item) => item.surgeryStatus === "진행중" || item.surgeryStatus === "준비중") ?? surgeryCases[0],
+    [],
+  );
 
   const login = () => {
     if (userId === "nurse") setRoleMode("NURSE_MODE");
@@ -114,6 +119,20 @@ export default function DashboardPage() {
           </section>
         ) : roleMode === "NURSE_MODE" ? (
           <>
+            <header className="rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_6px_18px_rgba(0,82,204,0.08)]">
+              <p className="text-xs font-semibold text-slate-500">현재 진행 수술</p>
+              <h1 className="mt-1 text-xl font-bold text-[#0052CC]">{currentSurgery.surgeryName}</h1>
+              <p className="mt-1 text-sm font-semibold text-slate-700">{currentSurgery.surgeon} · {currentSurgery.operatingRoom}</p>
+              <button
+                type="button"
+                onClick={() => void simulateCameraScan()}
+                className="mt-3 inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#0052CC] text-sm font-semibold text-white"
+              >
+                <Camera className="size-4" />
+                물품 추가 (바코드/QR/수기)
+              </button>
+            </header>
+
             <header className="rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_6px_18px_rgba(0,82,204,0.08)]">
               <p className="text-xs font-semibold text-slate-500">일반간호사 모드</p>
               <h1 className="mt-1 text-lg font-bold text-[#0052CC]">오늘 담당 수술 타임라인</h1>
@@ -192,6 +211,13 @@ export default function DashboardPage() {
               className="fixed bottom-24 right-4 inline-flex size-12 items-center justify-center rounded-full bg-[#0052CC] text-white shadow-[0_8px_18px_rgba(0,82,204,0.3)]"
             >
               <Info className="size-5" />
+            </button>
+            <button
+              type="button"
+              onClick={() => void simulateCameraScan()}
+              className="fixed bottom-24 left-4 inline-flex size-12 items-center justify-center rounded-full bg-[#0052CC] text-white shadow-[0_8px_18px_rgba(0,82,204,0.3)]"
+            >
+              <Camera className="size-5" />
             </button>
             {quickHelpOpen && (
               <section className="fixed inset-0 z-30 flex items-end bg-black/30">
