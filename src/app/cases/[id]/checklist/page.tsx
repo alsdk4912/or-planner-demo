@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import {
   Activity,
@@ -120,7 +120,7 @@ export default function ChecklistExecutionPage() {
   const selectedStageState = caseState.stages[selectedStage];
   const completionTone = selectedStageState.status === "완료" ? "ok" : selectedStageState.status === "진행중" ? "info" : "neutral";
 
-  const voiceLogs = useMemo(() => caseState.voiceLogs.slice(-4), [caseState.voiceLogs]);
+  const voiceLogs = caseState.voiceLogs.slice(-4);
 
   return (
     <MobileFrame>
