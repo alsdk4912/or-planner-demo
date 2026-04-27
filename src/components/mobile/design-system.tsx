@@ -5,6 +5,10 @@ import { BookOpenCheck, CalendarDays, Boxes, House, ShoppingCart } from "lucide-
 export function MobileFrame({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[var(--app-bg)]">
+      <Link href="/" className="fixed left-4 top-3 z-40 inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-1 text-xs font-extrabold text-[#0052CC] shadow-[0_4px_12px_rgba(0,82,204,0.16)]">
+        OR-<span>V</span>
+        <span className="-ml-0.5 text-[11px]">✓</span>
+      </Link>
       <main className="mx-auto w-full max-w-[420px] space-y-4 px-4 py-5">{children}</main>
     </div>
   );
@@ -58,6 +62,10 @@ export function HeaderHero({
     <header className="rounded-[24px] bg-gradient-to-b from-[#1e56ff] to-[#0f3fd6] p-5 text-white shadow-[0_8px_24px_rgba(30,86,255,0.25)]">
       <div className="flex items-start justify-between gap-3">
         <div>
+          <p className="text-xs font-extrabold tracking-wide text-blue-100">
+            OR-<span className="text-white">V</span>
+            <span className="-ml-0.5 text-[11px] text-white">✓</span>
+          </p>
           <h1 className="text-2xl font-semibold leading-tight">{title}</h1>
           <p className="mt-1 text-sm text-blue-100">{subtitle}</p>
         </div>

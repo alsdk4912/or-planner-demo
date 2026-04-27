@@ -53,6 +53,7 @@ export default function ChecklistExecutionPage() {
   const [countActual, setCountActual] = useState("20");
   const [showCountMismatchAlert, setShowCountMismatchAlert] = useState(false);
   const [showTimeOutControlModal, setShowTimeOutControlModal] = useState(false);
+  const [showVUnlock, setShowVUnlock] = useState(false);
 
   useEffect(() => {
     if (caseId) initializeCase(caseId);
@@ -63,7 +64,15 @@ export default function ChecklistExecutionPage() {
   }
 
   const caseState = cases[caseId] as CaseChecklistState | undefined;
-  if (!caseState) return null;
+  if (!caseState) {
+    return (
+      <MobileFrame>
+        <section className="rounded-2xl border border-blue-100 bg-white p-5 text-center">
+          <p className="text-sm font-semibold text-blue-700">수술실의 새로운 시야, OR-V가 안전을 체크합니다</p>
+        </section>
+      </MobileFrame>
+    );
+  }
 
   const stageGateMessages = checklistStageOrder.reduce(
     (acc, stage) => {
@@ -110,7 +119,17 @@ export default function ChecklistExecutionPage() {
     }
     const result = completeStage({ caseId, stage: selectedStage, actor: demoActor });
     if (!result.ok) setBlockMessage(result.reason ?? "단계 완료 처리에 실패했습니다.");
-    else setBlockMessage(null);
+    else {
+      setBlockMessage(null);
+      setShowVUnlock(true);
+      const idx = checklistStageOrder.indexOf(selectedStage);
+      const nextStage = checklistStageOrder[idx + 1];
+      if (nextStage) {
+        setSelectedStage(nextStage);
+        setExpandedStage(nextStage);
+      }
+      setTimeout(() => setShowVUnlock(false), 1000);
+    }
   };
 
   const handleMockVoice = () => {
@@ -417,6 +436,13 @@ export default function ChecklistExecutionPage() {
             >
               Time-out 제어 화면 닫기
             </button>
+          </div>
+        </section>
+      )}
+      {showVUnlock && (
+        <section className="fixed inset-0 z-50 flex items-center justify-center bg-blue-900/30">
+          <div className="rounded-full border border-blue-200 bg-white px-8 py-6 shadow-[0_16px_40px_rgba(0,82,204,0.25)]">
+            <p className="animate-pulse text-4xl font-extrabold text-[#0052CC]">V✓</p>
           </div>
         </section>
       )}

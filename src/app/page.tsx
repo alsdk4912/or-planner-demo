@@ -89,8 +89,11 @@ export default function DashboardPage() {
       <main className="mx-auto w-full max-w-[430px] space-y-3 px-4 py-4">
         {!roleMode ? (
           <section className="rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_6px_18px_rgba(0,82,204,0.08)]">
-            <p className="text-sm font-semibold text-[#0052CC]">ORPlanner 로그인</p>
+            <p className="text-sm font-semibold text-[#0052CC]">OR-V 로그인</p>
             <p className="mt-1 text-xs text-slate-500">사용자 권한에 따라 필요한 정보만 노출하여 인지 부하를 줄입니다.</p>
+            <p className="mt-2 rounded-lg bg-blue-50 px-2 py-2 text-xs font-semibold text-blue-700">
+              수술실의 새로운 시야, OR-V가 안전을 체크합니다
+            </p>
             <input
               value={userId}
               onChange={(event) => setUserId(event.target.value)}
@@ -109,7 +112,7 @@ export default function DashboardPage() {
           <>
             <header className="rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_6px_18px_rgba(0,82,204,0.08)]">
               <p className="text-xs font-semibold text-slate-500">현재 진행 수술</p>
-              <h1 className="mt-1 text-xl font-bold text-[#0052CC]">{currentSurgery.surgeryName}</h1>
+              <h1 className="mt-1 text-xl font-bold text-[#0052CC]">갑상선 절제술</h1>
               <p className="mt-1 text-sm font-semibold text-slate-700">{currentSurgery.surgeon} · {currentSurgery.operatingRoom}</p>
               <button
                 type="button"
@@ -166,6 +169,17 @@ export default function DashboardPage() {
                 <p className="text-xs font-semibold text-emerald-700">{cameraSyncMessage}</p>
               </section>
             )}
+            <section className="sticky bottom-16 z-20 rounded-2xl border border-blue-200 bg-white p-3 shadow-[0_6px_16px_rgba(0,82,204,0.12)]">
+              <p className="text-[11px] font-semibold text-blue-700">실시간 물품 추가</p>
+              <button
+                type="button"
+                onClick={() => void simulateCameraScan()}
+                className="mt-1 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0052CC] text-sm font-semibold text-white"
+              >
+                <Camera className="size-4" />
+                하단 빠른 추가 (QR/바코드)
+              </button>
+            </section>
 
             <button
               type="button"
@@ -195,7 +209,7 @@ export default function DashboardPage() {
           <>
             <header className="rounded-2xl border border-blue-100 bg-white p-4 shadow-[0_6px_18px_rgba(0,82,204,0.08)]">
               <p className="text-xs font-semibold text-slate-500">관리자 모드</p>
-              <h1 className="mt-1 text-lg font-bold text-[#0052CC]">Compliance Dashboard</h1>
+              <h1 className="mt-1 text-lg font-bold text-[#0052CC]">오르비 지수 (Compliance Index)</h1>
               <div className="mt-3 flex items-center gap-3">
                 <div
                   className="relative size-24 rounded-full"
