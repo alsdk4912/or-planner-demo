@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { BarChart3, Camera, Info, ShoppingCart } from "lucide-react";
 
@@ -284,16 +285,24 @@ export default function DashboardPage() {
         )}
       </main>
       {roleMode && (
-        <button
-          type="button"
-          onClick={() => {
-            setRoleMode(null);
-            setUserId("");
-          }}
-          className="fixed right-4 top-4 z-30 rounded-lg bg-[#0052CC] px-3 py-2 text-xs font-semibold text-white"
-        >
-          로그아웃
-        </button>
+        <div className="fixed right-4 top-4 z-30 flex items-center gap-2">
+          <Link
+            href="/settings/"
+            className="rounded-lg bg-white px-3 py-2 text-xs font-semibold text-[#0052CC] shadow-[0_4px_12px_rgba(0,82,204,0.18)]"
+          >
+            설정
+          </Link>
+          <button
+            type="button"
+            onClick={() => {
+              setRoleMode(null);
+              setUserId("");
+            }}
+            className="rounded-lg bg-[#0052CC] px-3 py-2 text-xs font-semibold text-white"
+          >
+            로그아웃
+          </button>
+        </div>
       )}
       <AppTabBar currentPath="/" />
     </div>
