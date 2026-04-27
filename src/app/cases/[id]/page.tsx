@@ -48,10 +48,10 @@ export default function SurgeryCaseDetailPage({
       </div>
 
       <section className="sticky top-2 z-10 grid grid-cols-4 gap-2 rounded-2xl bg-white/95 p-2 backdrop-blur">
-        <SegmentTab href={`/cases/${surgery.id}?tab=요약`} label="요약" active={section === "요약"} />
-        <SegmentTab href={`/cases/${surgery.id}?tab=준비`} label="준비" active={section === "준비"} />
-        <SegmentTab href={`/cases/${surgery.id}?tab=프로토콜`} label="프로토콜" active={section === "프로토콜"} />
-        <SegmentTab href={`/cases/${surgery.id}?tab=체크`} label="체크" active={section === "체크"} />
+        <SegmentTab href={`/cases/${surgery.id}/?tab=요약`} label="요약" active={section === "요약"} />
+        <SegmentTab href={`/cases/${surgery.id}/?tab=준비`} label="준비" active={section === "준비"} />
+        <SegmentTab href={`/cases/${surgery.id}/?tab=프로토콜`} label="프로토콜" active={section === "프로토콜"} />
+        <SegmentTab href={`/cases/${surgery.id}/?tab=체크`} label="체크" active={section === "체크"} />
       </section>
 
       {section === "요약" && (
@@ -166,10 +166,10 @@ export default function SurgeryCaseDetailPage({
           <InfoListCard title="다음 단계 안내" items={detail.nextStepGuidance} />
         </>
       )}
-      <BottomCTABar label="체크리스트 수행 시작" href={`/cases/${surgery.id}/checklist`} />
+      <BottomCTABar label="체크리스트 수행 시작" href={`/cases/${surgery.id}/checklist/`} />
       <div className="grid grid-cols-2 gap-2 pb-2">
-        <Link href="/manual" className="rounded-xl bg-white px-3 py-3 text-center text-sm font-semibold text-slate-700">매뉴얼 보기</Link>
-        <Link href={`/preferences?surgeon=${encodeURIComponent(surgery.surgeon)}`} className="rounded-xl bg-white px-3 py-3 text-center text-sm font-semibold text-slate-700">교수별 차이 보기</Link>
+        <Link href="/manual/" className="rounded-xl bg-white px-3 py-3 text-center text-sm font-semibold text-slate-700">매뉴얼 보기</Link>
+        <Link href={`/preferences/?surgeon=${encodeURIComponent(surgery.surgeon)}`} className="rounded-xl bg-white px-3 py-3 text-center text-sm font-semibold text-slate-700">교수별 차이 보기</Link>
       </div>
     </MobileFrame>
   );
